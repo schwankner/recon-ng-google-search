@@ -40,14 +40,14 @@ class Module(BaseModule, BingAPIMixin):
                             pdf.close()
                             return text
             except requests.exceptions.RequestException as e:
-                self.alert(url, e)
+                self.alert(url + ' ' + + str(e))
         else:
             try:
                 with requests.get(url, stream=True, timeout=self.options['timeout'], verify=False) as r:
                     if 200 == r.status_code:
                         return r.text
             except requests.exceptions.RequestException as e:
-                self.alert(url, e)
+                self.alert(url + ' ' + str(e))
 
     def module_run(self, domains):
         for domain in domains:
