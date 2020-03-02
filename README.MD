@@ -26,7 +26,7 @@ domain (TEXT): telekom.de
 notes (TEXT): 
 [*] 1 rows affected.
 [recon-ng][telekom] > modules load recon/domains-contacts/google_search
-[recon-ng][telekom][hunter] > run
+[recon-ng][telekom][google_search] > run
 ...
 
 ```
