@@ -35,8 +35,10 @@ class Module(BaseModule, BingAPIMixin):
                                 if chunk:
                                     f.write(chunk)
                             pdf = pdfplumber.load(f)
-                            page = pdf.pages[0]
-                            text = page.extract_text()
+                            text=''
+                            for i in range(0, len(pdf.pages)):
+                                page = pdf.pages[i]
+                                text = text + page.extract_text()
                             pdf.close()
                             return text
             except requests.exceptions.RequestException as e:
