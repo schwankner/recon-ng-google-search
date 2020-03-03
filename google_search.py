@@ -3,16 +3,16 @@ import requests
 import io
 import pdfplumber
 from recon.core.module import BaseModule
-from recon.mixins.search import BingAPIMixin
 import re
 
 
-class Module(BaseModule, BingAPIMixin):
+class Module(BaseModule):
     meta = {
         'name': 'Google Search Contact Harvester',
         'author': 'schwankner',
         'version': '1.0',
         'description': 'Harvests e-mails via Google by searching with Google Search and opening and parsing the results. Can parse html as well as pdfs and add e-mails to the \'contacts\' table.',
+        'dependencies': ['googlesearch','pdfplumber'],
         'comments': (
             'Be sure to set the \'locale\' option to the region your target is located in.',
             'You will get better results if you use the Google Search page from your targets country',
@@ -38,11 +38,14 @@ class Module(BaseModule, BingAPIMixin):
                             text=''
                             for i in range(0, len(pdf.pages)):
                                 page = pdf.pages[i]
-                                text = text + page.extract_text()
+
+                                page_text = page.extract_text()
+                                if isinstance(page_text, str):
+                                    text = text + page_text
                             pdf.close()
                             return text
             except requests.exceptions.RequestException as e:
-                self.alert(url + ' ' + + str(e))
+                self.alert(url + ' ' + str(e))
         else:
             try:
                 with requests.get(url, stream=True, timeout=self.options['timeout'], verify=False) as r:
