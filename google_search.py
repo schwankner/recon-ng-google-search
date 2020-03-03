@@ -72,6 +72,7 @@ class Module(BaseModule):
                         r"(?:[A-Za-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@" + domain,
                         text)
                     for finding in findings:
+                        finding = finding.lower()
                         if finding not in found:
                             self.insert_contacts(email=finding, notes='Source: ' + url)
                             found[finding] = [finding]
