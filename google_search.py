@@ -1,5 +1,4 @@
 from googlesearch import search
-import requests
 import io
 import pdfplumber
 from recon.core.module import BaseModule
@@ -12,7 +11,7 @@ class Module(BaseModule):
         'author': 'schwankner',
         'version': '1.0',
         'description': 'Harvests e-mails via Google by searching with Google Search and opening and parsing the results. Can parse html as well as pdfs and add e-mails to the \'contacts\' table.',
-        'dependencies': ['googlesearch','pdfplumber'],
+        'dependencies': ['googlesearch', 'pdfplumber'],
         'comments': (
             'Be sure to set the \'locale\' option to the region your target is located in.',
             'You will get better results if you use the Google Search page from your targets country',
@@ -28,30 +27,30 @@ class Module(BaseModule):
     def get_text(self, url):
         if url[-4:] == '.pdf':
             try:
-                with requests.get(url, stream=True, timeout=self.options['timeout'], verify=False) as r:
-                    if 200 == r.status_code and 'application/pdf' == r.headers['Content-Type']:
-                        with io.BytesIO() as f:
-                            for chunk in r.iter_content(chunk_size=8192):
-                                if chunk:
-                                    f.write(chunk)
-                            pdf = pdfplumber.load(f)
-                            text=''
-                            for i in range(0, len(pdf.pages)):
-                                page = pdf.pages[i]
+                r = self.request('GET', url, stream=True, timeout=self.options['timeout'], verify=False)
+                if 200 == r.status_code and 'application/pdf' == r.headers['Content-Type']:
+                    with io.BytesIO() as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+                        pdf = pdfplumber.load(f)
+                        text = ''
+                        for i in range(0, len(pdf.pages)):
+                            page = pdf.pages[i]
 
-                                page_text = page.extract_text()
-                                if isinstance(page_text, str):
-                                    text = text + page_text
-                            pdf.close()
-                            return text
-            except requests.exceptions.RequestException as e:
+                            page_text = page.extract_text()
+                            if isinstance(page_text, str):
+                                text = text + page_text
+                        pdf.close()
+                        return text
+            except Exception as e:
                 self.alert(url + ' ' + str(e))
         else:
             try:
-                with requests.get(url, stream=True, timeout=self.options['timeout'], verify=False) as r:
-                    if 200 == r.status_code:
-                        return r.text
-            except requests.exceptions.RequestException as e:
+                r = self.request('GET', url, stream=True, timeout=self.options['timeout'], verify=False)
+                if 200 == r.status_code:
+                    return r.text
+            except Exception as e:
                 self.alert(url + ' ' + str(e))
 
     def module_run(self, domains):
