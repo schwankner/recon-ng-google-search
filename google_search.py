@@ -53,6 +53,17 @@ class Module(BaseModule):
             except Exception as e:
                 self.alert(url + ' ' + str(e))
 
+    def extract_names(self, email):
+        first_part = email.split("@")[0]
+        name_parts = first_part.split(".")
+        first_name, last_name = '',''
+        if len(name_parts) == 2:
+            first_name = name_parts[0]
+            last_name = name_parts[1]
+        elif len(name_parts) > 2:
+            first_name = name_parts[len(name_parts) - 2]
+        return first_name.capitalize() , last_name.capitalize() 
+
     def module_run(self, domains):
         for domain in domains:
             found = {}
@@ -72,8 +83,13 @@ class Module(BaseModule):
                         r"(?:[A-Za-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@" + domain,
                         text)
                     for finding in findings:
+                        first_name, last_name = self.extract_names(finding)
                         finding = finding.lower()
                         if finding not in found:
-                            self.insert_contacts(email=finding, notes='Source: ' + url)
+                            if first_name != "" and len(first_name) > 0 and last_name != "" and len(last_name):
+                                self.insert_contacts(email=finding, first_name=first_name, last_name=last_name,
+                                                     notes='Source: ' + url)
+                            else:
+                                self.insert_contacts(email=finding, notes='Source: ' + url)
                             found[finding] = [finding]
 
